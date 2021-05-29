@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/dogicon.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/dogicon.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * This module handling dog card icons.
+ * @module dogicon
+ * @author Kieran Dhir
+ * @see dogcard for the module that requires this module
+ */
+
+import React from 'react';
+
+import StarOutlined from '@ant-design/icons/StarOutlined';
+import StarFilled from '@ant-design/icons/StarFilled';
+import EditOutlined from '@ant-design/icons/EditOutlined';
+import EditFilled from '@ant-design/icons/EditFilled';
+import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
+import DeleteFilled from '@ant-design/icons/DeleteFilled';
+
+/**
+ * @typedef {"filled" | "outlined"} theme
+ * @typedef {"favourite" | "edit" | "delete"} iconType
+ */
+         
+/**
+ * Determine the icon to be displayed
+ * 
+ * @param {theme} theme - design of icon
+ * @param {iconType} iconType - icon to show
+ * @returns {Object} - the correct Ant Design icon component
+ */
+function getIcon (theme, iconType) {
+    let Icon;
+    if (theme === 'filled') {
+        if (iconType === 'favourite'){
+            Icon = StarFilled;
+        }else if (iconType === 'edit'){
+            Icon = EditFilled;
+        }else if (iconType === 'delete'){
+            Icon = DeleteFilled;
+        }
+    } else if (theme === 'outlined') {
+        if (iconType === 'favourite'){
+            Icon = StarOutlined;
+        }else if (iconType === 'edit'){
+            Icon = EditOutlined;
+        }else if (iconType === 'delete'){
+            Icon = DeleteOutlined;
+        }  
+    }
+    return Icon;
+}
+
+/**
+ * Defines each dog icon for dog card
+ * @class
+ */
+class DogIcon extends React.Component {
+    /**
+     * @constructor
+     * @param {props} props - react properties to be passed
+     */
+    constructor(props){  
+        super(props);  
+        this.state = {
+            selected: props.selected
+        };
+        this.onClick = this.onClick.bind(this);
+    }
+
+    /**
+     * Function to revert the selected state with every click
+     * @returns {null}
+     */
+    onClick(){
+        if (this.props.viewOnly) {
+            console.log('This icon is view only: preventing update');
+            return;
+        }
+    this.setState({selected: !this.state.selected});
+    }
+
+    /**
+     * Invoked immediateky after updating occurs
+     * Calls handleToggle if the state has changed
+     * @param {props} prevProps - previous props
+     * @param {props} prevState  - previous state of props
+     */
+    componentDidUpdate(prevProps, prevState){
+        if (prevState.selected !== this.state.selected) {
+            /** run the handler passed in by the parent component */
+            this.props.handleToggle(this.state.selected);
+        }
+    }
+
+    /**
+     * Render ant design icons
+     * @returns {JSX} - ant design icons
+     */
+    render(){
+        const theme = this.state.selected ? 'filled' : 'outlined';
+        const iconType = this.props.type;
+        const Icon = getIcon(theme, iconType);
+
+        /** 
+         * return a span that contains the desired icon
+         * and a space then the counter
+         * if the icon is clicked we will run onClick handler
+         * */ 
+        return (
+            &lt;span>
+            &lt;Icon
+                onClick={this.onClick}
+                style={{color:'steelblue'}} />
+            &lt;/span>
+        );
+    }
+}
+
+export default DogIcon;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-app.html">app</a></li><li><a href="module-app-test.html">app-test</a></li><li><a href="module-dogcard.html">dogcard</a></li><li><a href="module-dogform.html">dogform</a></li><li><a href="module-doggrid.html">doggrid</a></li><li><a href="module-dogicon.html">dogicon</a></li><li><a href="module-favgrid.html">favgrid</a></li><li><a href="module-favourites.html">favourites</a></li><li><a href="module-home.html">home</a></li><li><a href="module-login.html">login</a></li><li><a href="module-navbar.html">navbar</a></li><li><a href="module-navimage.html">navimage</a></li><li><a href="module-register.html">register</a></li><li><a href="module-searchdog.html">searchdog</a></li><li><a href="module-searchgrid.html">searchgrid</a></li><li><a href="module-singledog.html">singledog</a></li><li><a href="module-updatedog.html">updatedog</a></li><li><a href="module-upload.html">upload</a></li></ul><h3>Classes</h3><ul><li><a href="module-app-App.html">App</a></li><li><a href="module-dogcard-DogCard.html">DogCard</a></li><li><a href="module-dogform-DogForm.html">DogForm</a></li><li><a href="module-doggrid-DogGrid.html">DogGrid</a></li><li><a href="module-dogicon-DogIcon.html">DogIcon</a></li><li><a href="module-favgrid-FaveGrid.html">FaveGrid</a></li><li><a href="module-login-LoginForm.html">LoginForm</a></li><li><a href="module-register-RegistrationForm.html">RegistrationForm</a></li><li><a href="module-searchgrid-SearchGrid.html">SearchGrid</a></li><li><a href="module-singledog-Dog.html">Dog</a></li><li><a href="module-updatedog-UpdateForm.html">UpdateForm</a></li><li><a href="module-upload-UploadForm.html">UploadForm</a></li></ul><h3>Global</h3><ul><li><a href="global.html#json">json</a></li><li><a href="global.html#status">status</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Mon Apr 26 2021 16:19:44 GMT+0100 (British Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

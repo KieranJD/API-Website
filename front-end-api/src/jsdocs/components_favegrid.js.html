@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/favegrid.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/favegrid.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * This module for generating a ant design favourite grid for each dog card.
+ * @module favgrid
+ * @author Kieran Dhir
+ * @see favourites for the module that requires this module
+ */
+
+import React from 'react';
+import { Col, Row } from 'antd';
+import DogCard from './dogcard';
+import { status, json } from '../utilities/requestHandlers';
+import UserContext from '../contexts/user';
+
+/**
+ * Favourite dog grid for displaying dog cards
+ * @class
+ */
+class FaveGrid extends React.Component {
+
+    /**
+     * @constructor
+     * @param {props} props - react properties to be passed
+     */
+    constructor(props) {
+        super(props);
+        this.state = {
+            dogs: []
+        }
+    }
+
+    static contextType = UserContext;
+
+    /**
+     * Invoked immediately after component is mounted
+     * Requests all favoruite dog entries for a user from backend.
+     */
+    componentDidMount() {
+        const userid = this.context.user.ID;
+        fetch(`http://localhost:3030/users/${userid}/favourites`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": this.context.user.token
+            }
+        })
+        .then(status)
+        .then(json)
+        .then(data => {
+            this.setState({ dogs: data })
+        })
+        .catch(err => {
+            if (err.status === 404){
+                return &lt;h3>No Match&lt;/h3>
+            }else{
+                console.log("Error fetching dogs", err);
+            }
+        }); 
+    }
+
+    /**
+     * Render react grid for displaying a user's favourite dog cards
+     * @returns {JSX} - a user's favourite dog grid
+     */
+    render() {
+        if (!this.state.dogs.length) {
+            return &lt;h3>Loading favourites...&lt;/h3>
+        }
+        /**
+         * Generates list of dog card entries
+         */
+        const cardList = this.state.dogs.map(dog => {
+            return (
+                &lt;div style={{padding:"10px"}} key={dog.id}>
+                    &lt;Col span={6}>
+                        &lt;DogCard {...dog} />
+                    &lt;/Col>
+                &lt;/div>
+          )
+        });
+        /** Returns list of dog cards in a grid */
+        return (
+            &lt;Row type="flex" justify="space-around">
+                {cardList}
+            &lt;/Row>
+        );
+      }
+}
+
+export default FaveGrid;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-app.html">app</a></li><li><a href="module-app-test.html">app-test</a></li><li><a href="module-dogcard.html">dogcard</a></li><li><a href="module-dogform.html">dogform</a></li><li><a href="module-doggrid.html">doggrid</a></li><li><a href="module-dogicon.html">dogicon</a></li><li><a href="module-favgrid.html">favgrid</a></li><li><a href="module-favourites.html">favourites</a></li><li><a href="module-home.html">home</a></li><li><a href="module-login.html">login</a></li><li><a href="module-navbar.html">navbar</a></li><li><a href="module-navimage.html">navimage</a></li><li><a href="module-register.html">register</a></li><li><a href="module-searchdog.html">searchdog</a></li><li><a href="module-searchgrid.html">searchgrid</a></li><li><a href="module-singledog.html">singledog</a></li><li><a href="module-updatedog.html">updatedog</a></li><li><a href="module-upload.html">upload</a></li></ul><h3>Classes</h3><ul><li><a href="module-app-App.html">App</a></li><li><a href="module-dogcard-DogCard.html">DogCard</a></li><li><a href="module-dogform-DogForm.html">DogForm</a></li><li><a href="module-doggrid-DogGrid.html">DogGrid</a></li><li><a href="module-dogicon-DogIcon.html">DogIcon</a></li><li><a href="module-favgrid-FaveGrid.html">FaveGrid</a></li><li><a href="module-login-LoginForm.html">LoginForm</a></li><li><a href="module-register-RegistrationForm.html">RegistrationForm</a></li><li><a href="module-searchgrid-SearchGrid.html">SearchGrid</a></li><li><a href="module-singledog-Dog.html">Dog</a></li><li><a href="module-updatedog-UpdateForm.html">UpdateForm</a></li><li><a href="module-upload-UploadForm.html">UploadForm</a></li></ul><h3>Global</h3><ul><li><a href="global.html#json">json</a></li><li><a href="global.html#status">status</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Mon Apr 26 2021 16:19:44 GMT+0100 (British Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: routes/favourites.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: routes/favourites.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * This module will handle favourite route API calls.
+ * @module routes/favourites
+ * @author Kieran Dhir
+ * @require models/* for the models that are required for this module
+ */
+
+const Router = require('koa-router');
+const bodyParser = require('koa-bodyparser');
+const favModel = require('../models/favourites');
+const dogModel = require('../models/dogs');
+const verifyToken = require('../controllers/token');
+const can = require('../permissions/favourites');
+
+const prefix = '/users/:userid([0-9]{1,})/favourites';
+const router = Router({prefix: prefix});
+
+/** Routes */
+router.get('/', verifyToken ,getAllByUserID);
+router.post('/:id([0-9]{1,})', verifyToken, bodyParser(), addFav);
+router.del('/:id([0-9]{1,})', verifyToken, deleteFav);
+
+/**
+ * Async utility function to get all a user's favourite dog entries.
+ * @param {object} ctx - the Koa request/response context object
+ */
+async function getAllByUserID(ctx) {
+  const userID = ctx.params.userid;
+  let result = await favModel.getAll(userID);
+  if (result.length) {
+    const data = result[0];
+    const permission = can.readAll(ctx.state.user, data);
+    if(!permission.granted){
+      ctx.status = 403;
+    }else{
+      result = permission.filter(result);
+      let dogs = [];
+      var i;
+      for (i = 0; i &lt; result.length; i++) {
+        dogs.push(result[i].dogID);
+      }
+      result = await dogModel.getFavList(dogs);
+      ctx.body = result;
+    }
+  }else{
+    ctx.status = 404;
+  }
+}
+
+/**
+ * Async utility function to add a favourite dog entry for a user.
+ * @param {object} ctx - the Koa request/response context object
+ */
+async function addFav(ctx) {
+  const dogID = parseInt(ctx.params.id);
+  const userID = parseInt(ctx.params.userid);
+  const permission = can.add(ctx.state.user, userID);
+  if(!permission.granted){
+    ctx.status = 403;
+  }else{
+      let check = await dogModel.getById(dogID); /** Check dogID entry exists in DB */
+      if(check.length){
+      let result = await favModel.getById(userID, dogID); /** Check if dog entry dogID is already favourited */
+      if(result.length == 0 ){
+        const result = await favModel.add(userID, dogID);
+        if (result.affectedRows) {
+          ctx.status = 201;
+          ctx.body = {ID: dogID, created: true, link: `${ctx.host}${ctx.request.path}`};
+        }
+      }else {
+        console.log('already exists')
+        ctx.status = 401;
+      }
+    }else{
+      console.log('Dog does not exists')
+      ctx.status = 404;
+    }
+  }
+}
+
+/**
+ * Async utility function to delete a favourite dog entry for a user.
+ * @param {object} ctx - the Koa request/response context object
+ */
+async function deleteFav(ctx){
+  const dogID = parseInt(ctx.params.id);
+  const userID = parseInt(ctx.params.userid);
+  const permission = can.add(ctx.state.user, userID);
+  if(!permission.granted){
+    ctx.status = 403;
+  }else{
+    let result = await favModel.getById(userID, dogID) /** Check dogID entry exists in DB */
+    if(result.length){
+      result = await favModel.delById(userID, dogID);
+      if (result.affectedRows) {
+        ctx.status = 200;
+        ctx.body = {ID: dogID, deleted: true}
+      }
+    }else {
+      ctx.status = 404;
+    }
+  }
+}
+
+module.exports = router;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-app.html">app</a></li><li><a href="module-controllers_auth.html">controllers/auth</a></li><li><a href="module-controllers_token.html">controllers/token</a></li><li><a href="module-controllers_validation.html">controllers/validation</a></li><li><a href="module-helpers_database.html">helpers/database</a></li><li><a href="module-helpers_genKeyPair.html">helpers/genKeyPair</a></li><li><a href="module-index.html">index</a></li><li><a href="module-models_dogs.html">models/dogs</a></li><li><a href="module-models_favourites.html">models/favourites</a></li><li><a href="module-models_users.html">models/users</a></li><li><a href="module-permissions_dogs.html">permissions/dogs</a></li><li><a href="module-permissions_favourites.html">permissions/favourites</a></li><li><a href="module-permissions_grants_dogsGrants.html">permissions/grants/dogsGrants</a></li><li><a href="module-permissions_grants_favGrants.html">permissions/grants/favGrants</a></li><li><a href="module-permissions_grants_userGrants.html">permissions/grants/userGrants</a></li><li><a href="module-permissions_users.html">permissions/users</a></li><li><a href="module-routes___tests___dogRoutes.html">routes/__tests__/dogRoutes</a></li><li><a href="module-routes___tests___favouriteRoutes.html">routes/__tests__/favouriteRoutes</a></li><li><a href="module-routes___tests___userRoutes.html">routes/__tests__/userRoutes</a></li><li><a href="module-routes_dogs.html">routes/dogs</a></li><li><a href="module-routes_favourites.html">routes/favourites</a></li><li><a href="module-routes_users.html">routes/users</a></li><li><a href="module-strategies_basic.html">strategies/basic</a></li><li><a href="module-strategies_issueJwt.html">strategies/issueJwt</a></li><li><a href="module-strategies_verifyJwt.html">strategies/verifyJwt</a></li></ul><h3>Classes</h3><ul><li><a href="module-helpers_database-DatabaseException.html">DatabaseException</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Mon Apr 26 2021 16:18:16 GMT+0100 (British Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

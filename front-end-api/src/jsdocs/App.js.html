@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: App.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: App.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * A module to set-up react and routes.
+ * @module app
+ * @author Kieran Dhir
+ */
+
+import React from 'react';
+import { Layout } from 'antd';
+import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
+import './App.css';
+
+import Navbar from './components/navbar'
+import Home from './components/home';
+import Register from './components/register';
+import Login from './components/login';
+import Dog from './components/singledog';
+import Favourites from './components/favourites';
+import Upload from './components/upload';
+import UpdateDog from './components/updatedog';
+import SearchDog from './components/searchdog';
+
+import UserContext from './contexts/user'
+import createHistory from 'history/createBrowserHistory'
+
+const history = createHistory();
+
+const { Header, Content, Footer } = Layout;
+
+/**
+ * Creates the app react component
+ * @class
+ */
+class App extends React.Component {
+    
+    /**
+     * @constructor
+     * @param {props} props - react properties to be passed
+     */
+    constructor(props) {
+        super(props);
+        this.state = {
+            user: {loggedIn: false}
+        }
+        this.login = this.login.bind(this);
+        this.logout = this.logout.bind(this);
+    }
+
+    /**
+     * Function to login user by setting user context to contain the current user
+     * @param {object} user - user to be logged in
+     */
+    login(user) {
+        console.log(`${user.username} is now being logged in`);
+        user.loggedIn = true;
+        this.setState({user:user})
+    }
+
+    /**
+     * Function to loggout user by clearing user context
+     */
+    logout() {
+        console.log(`user is now being logged out`);
+        this.setState({user: {loggedIn:false}});
+    }
+    
+    /**
+     * Render Router
+     * @returns {React} - app router
+     */
+    render () {
+        /** Define context */
+        const context = {
+            user: this.state.user,
+            login: this.login,
+            logout: this.logout
+        };
+
+        /** Conditional rendering */
+        let StatusLinks;
+        if (this.state.user.role === 'admin'){ /** Only allow admin to Upload */
+            StatusLinks = (
+                &lt;>
+                &lt;Route path="/upload" children={&lt;Upload />} />,
+                &lt;Route path="/update/dog/:id" children={&lt;UpdateDog />} />
+                &lt;Route path="/users/:userid/favourites" children={&lt;Favourites />} />,
+                &lt;/>
+            );
+        }else if (this.state.user.loggedIn !== false){ /** Only available when logginIn */
+            StatusLinks = (
+                &lt;>
+                &lt;Route path="/users/:userid/favourites" children={&lt;Favourites />} />,
+                &lt;/>
+            );
+        }
+        
+        /** Return app router */
+        return (
+            &lt;UserContext.Provider value={context}>
+                &lt;Router history={history}>
+                    &lt;Header>
+                        &lt;Navbar />
+                    &lt;/Header>
+
+                    &lt;Content>
+                        &lt;Switch>
+                            &lt;Route path="/" children={&lt;Home />} exact />
+                            &lt;Route path="/login" children={&lt;Login />} />
+                            &lt;Route path="/register" children={&lt;Register />} />
+                            &lt;Route path="/dog/:id" children={&lt;Dog />} />
+                            &lt;Route path="/dogs/search" children={&lt;SearchDog />} />
+                            {StatusLinks}
+                        &lt;/Switch>
+                    &lt;/Content>
+
+                    &lt;Footer style={{ textAlign: 'center' }}>Canine Shelter Footer&lt;/Footer>
+
+                &lt;/Router>
+            &lt;/UserContext.Provider>
+        );
+    }
+}
+
+export default App;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-app.html">app</a></li><li><a href="module-app-test.html">app-test</a></li><li><a href="module-dogcard.html">dogcard</a></li><li><a href="module-dogform.html">dogform</a></li><li><a href="module-doggrid.html">doggrid</a></li><li><a href="module-dogicon.html">dogicon</a></li><li><a href="module-favgrid.html">favgrid</a></li><li><a href="module-favourites.html">favourites</a></li><li><a href="module-home.html">home</a></li><li><a href="module-login.html">login</a></li><li><a href="module-navbar.html">navbar</a></li><li><a href="module-navimage.html">navimage</a></li><li><a href="module-register.html">register</a></li><li><a href="module-searchdog.html">searchdog</a></li><li><a href="module-searchgrid.html">searchgrid</a></li><li><a href="module-singledog.html">singledog</a></li><li><a href="module-updatedog.html">updatedog</a></li><li><a href="module-upload.html">upload</a></li></ul><h3>Classes</h3><ul><li><a href="module-app-App.html">App</a></li><li><a href="module-dogcard-DogCard.html">DogCard</a></li><li><a href="module-dogform-DogForm.html">DogForm</a></li><li><a href="module-doggrid-DogGrid.html">DogGrid</a></li><li><a href="module-dogicon-DogIcon.html">DogIcon</a></li><li><a href="module-favgrid-FaveGrid.html">FaveGrid</a></li><li><a href="module-login-LoginForm.html">LoginForm</a></li><li><a href="module-register-RegistrationForm.html">RegistrationForm</a></li><li><a href="module-searchgrid-SearchGrid.html">SearchGrid</a></li><li><a href="module-singledog-Dog.html">Dog</a></li><li><a href="module-updatedog-UpdateForm.html">UpdateForm</a></li><li><a href="module-upload-UploadForm.html">UploadForm</a></li></ul><h3>Global</h3><ul><li><a href="global.html#json">json</a></li><li><a href="global.html#status">status</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Mon Apr 26 2021 16:19:44 GMT+0100 (British Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: routes/dogs.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: routes/dogs.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * This module will handle dog route API calls.
+ * @module routes/dogs
+ * @author Kieran Dhir
+ * @see models/* for the models that are required for this module
+ */
+
+const Router = require('koa-router');
+const bodyParser = require('koa-bodyparser');
+const model = require('../models/dogs');
+const verifyToken = require('../controllers/token');
+const {validateDog} = require('../controllers/validation');
+const can = require('../permissions/dogs'); 
+
+const prefix = '/dogs';
+const router = Router({prefix: prefix});
+
+/** Routes */
+router.get('/', getAll);
+router.get('/search', search);
+router.post('/upload', verifyToken, bodyParser(), validateDog, addDog);
+router.get('/:id([0-9]{1,})', getById);
+router.put('/:id([0-9]{1,})', verifyToken, bodyParser(), validateDog, updateDog);
+router.del('/:id([0-9]{1,})', verifyToken, deleteDog);
+
+/**
+ * Async utility function to get all dog entries.
+ * @param {object} ctx - the Koa request/response context object
+ */
+async function getAll(ctx) {
+  const result = await model.getAll();
+  if (result.length) {
+    ctx.status = 200;
+    ctx.body = result;
+  }else{
+    ctx.status = 404;
+  }
+}
+
+/**
+ * Async utility function to get all dog entries matching a query.
+ * @param {object} ctx - the Koa request/response context object
+ * @param {function} next - text middleware
+ * @returns {function} - the next middleware
+ */
+async function search(ctx, next) {
+  let {q} = ctx.request.query;
+  if (q &amp;&amp; q.length &lt; 3){
+    ctx.status = 400;
+    ctx.body = {message: "Search must be 3 or more characters"}
+    return next();
+  }
+  let result = await model.search(q);
+  if (result.length){
+    ctx.status = 200;  
+    ctx.body = result;
+  }else{
+    ctx.status = 404;
+  }
+}
+
+/**
+ * Async utility function to get a dog entry by dogID.
+ * @param {object} ctx - the Koa request/response context object
+ */
+async function getById(ctx) {
+  const dogID = ctx.params.id;
+  const result = await model.getById(dogID);
+  if (result.length) {
+    const dog = result[0];
+    ctx.status = 200;
+    ctx.body = dog;
+  }else{
+    ctx.status = 404;
+  }
+}
+
+/**
+ * Async utility function to create a dog entry.
+ * @param {object} ctx - the Koa request/response context object
+ */
+async function addDog(ctx) {
+  const permission = can.add(ctx.state.user);
+  if(!permission.granted){
+    ctx.status = 403;
+  }else{
+    const body = ctx.request.body;
+    const result = await model.add(body);
+    if (result.affectedRows) {
+      const dogID = result.insertId;
+      ctx.status = 201;
+      ctx.body = {ID: dogID, created: true, link: `${ctx.host}${ctx.request.path}/${dogID}`};
+    }
+  }
+}
+
+/**
+ * Async utility function to update dog entry by dogID.
+ * @param {object} ctx - the Koa request/response context object
+ */
+async function updateDog(ctx) {
+  const dogID = ctx.params.id;
+  let result = await model.getById(dogID); /** Check dogID entry exists in DB */
+  if (result.length) {
+    let data = result[0];
+    const permission = can.update(ctx.state.user);
+    if(!permission.granted){
+      ctx.status = 403;
+    }else{
+      /** Exclude fields that should not be updated */
+      const {ID, dateRegistered, ...body} = ctx.request.body;
+      Object.assign(data, body); /** Overwrite updatable fields with body data */
+      result = await model.update(data);
+      if (result.affectedRows) {
+        ctx.status = 200;
+        ctx.body = {ID: dogID, updated: true, link: `${ctx.host}${ctx.request.path}`};
+      }
+    }
+  }else{
+    ctx.status = 404;
+  }
+}
+
+/**
+ * Async utility function to delete dog entry by dogID.
+ * @param {object} ctx - the Koa request/response context object
+ */
+async function deleteDog(ctx) {
+  const dogID = ctx.params.id;
+  let result = await model.getById(dogID); /** Check dogID entry exists in DB */
+  if (result.length) {
+    const permission = can.delete(ctx.state.user);
+    if(!permission.granted){
+      ctx.status = 403;
+    }else{
+      const result = await model.delById(dogID);
+      if (result.affectedRows) {
+        ctx.status = 200;
+        ctx.body = {ID: dogID, deleted: true}
+      }
+    }
+  }else{
+    ctx.status = 404;
+  }
+}
+
+module.exports = router;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-app.html">app</a></li><li><a href="module-controllers_auth.html">controllers/auth</a></li><li><a href="module-controllers_token.html">controllers/token</a></li><li><a href="module-controllers_validation.html">controllers/validation</a></li><li><a href="module-helpers_database.html">helpers/database</a></li><li><a href="module-helpers_genKeyPair.html">helpers/genKeyPair</a></li><li><a href="module-index.html">index</a></li><li><a href="module-models_dogs.html">models/dogs</a></li><li><a href="module-models_favourites.html">models/favourites</a></li><li><a href="module-models_users.html">models/users</a></li><li><a href="module-permissions_dogs.html">permissions/dogs</a></li><li><a href="module-permissions_favourites.html">permissions/favourites</a></li><li><a href="module-permissions_grants_dogsGrants.html">permissions/grants/dogsGrants</a></li><li><a href="module-permissions_grants_favGrants.html">permissions/grants/favGrants</a></li><li><a href="module-permissions_grants_userGrants.html">permissions/grants/userGrants</a></li><li><a href="module-permissions_users.html">permissions/users</a></li><li><a href="module-routes___tests___dogRoutes.html">routes/__tests__/dogRoutes</a></li><li><a href="module-routes___tests___favouriteRoutes.html">routes/__tests__/favouriteRoutes</a></li><li><a href="module-routes___tests___userRoutes.html">routes/__tests__/userRoutes</a></li><li><a href="module-routes_dogs.html">routes/dogs</a></li><li><a href="module-routes_favourites.html">routes/favourites</a></li><li><a href="module-routes_users.html">routes/users</a></li><li><a href="module-strategies_basic.html">strategies/basic</a></li><li><a href="module-strategies_issueJwt.html">strategies/issueJwt</a></li><li><a href="module-strategies_verifyJwt.html">strategies/verifyJwt</a></li></ul><h3>Classes</h3><ul><li><a href="module-helpers_database-DatabaseException.html">DatabaseException</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Mon Apr 26 2021 16:18:16 GMT+0100 (British Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

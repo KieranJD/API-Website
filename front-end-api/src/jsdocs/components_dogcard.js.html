@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/dogcard.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/dogcard.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * This module will generate dog entry ant design cards.
+ * @module dogcard
+ * @author Kieran Dhir
+ * @see doggrid for the module that requires this module
+ */
+
+import React from 'react';
+import { Card } from 'antd';
+import DogIcon from './dogicon';
+import NavImage from './navimage';
+import UserContext from '../contexts/user';
+import { status, json } from '../utilities/requestHandlers';
+import { Redirect } from 'react-router';
+
+const { Meta } = Card;
+
+/**
+ * Generates ant design cards for each dog entry 
+ * @class
+ */
+class DogCard extends React.Component {
+
+    /**
+     * @constructor
+     * @param {props} props - react properties to be passed
+     */
+    constructor(props) {
+        super(props);
+        this.toggleFavourite = this.toggleFavourite.bind(this);
+        this.selectEdit = this.selectEdit.bind(this);
+        this.selectDelete = this.selectDelete.bind(this);
+    }
+
+    static contextType = UserContext;
+
+    state = {redirect: null};
+
+    /**
+     * Function to toggle favourite icon
+     * @param {bool} isSelected - state of favourite icon
+     */
+    toggleFavourite(isSelected) {
+        console.log(`toggle FAVOURITE on dog post ${this.props.ID}`);
+        console.log(`new value ${isSelected}`);
+        if (isSelected === true){ /** Request dog entry is added to user's favourites */
+            fetch(`http://localhost:3030/users/${this.context.user.ID}/favourites/${this.props.ID}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": this.context.user.token
+                }
+            })
+            .then(status)
+            .then(json)
+            .then(data => {
+                console.log(`Added dog ${this.props.ID} to favourites successfully`)
+            })
+            .catch(errorResponse => {
+                console.error(`Error: ${JSON.stringify(errorResponse)}`);
+            })
+        }else{ /** Requests dog entry is deleted from user's favourites */
+            fetch(`http://localhost:3030/users/${this.context.user.ID}/favourites/${this.props.ID}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": this.context.user.token
+                }
+            })
+            .then(status)
+            .then(json)
+            .then(data => {
+                console.log(`Deleted dog ${this.props.ID} from favourites successfully`)
+            })
+            .catch(errorResponse => {
+                console.error(`Error: ${JSON.stringify(errorResponse)}`);
+            })
+        } 
+    }
+
+    /**
+     * Function to redirect to given update link if edit icon is clicked
+     */
+    selectEdit(){
+        this.setState({redirect:`/update/dog/${this.props.ID}`});
+    }
+
+    /**
+     * Function to delete dog entries
+     * Requests delete for given dog entry to backend.
+     */
+    selectDelete(){
+        console.log(`Deleting dog ${this.props.ID}`)
+        fetch(`http://localhost:3030/dogs/${this.props.ID}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": this.context.user.token
+            }
+        })
+        .then(status)
+        .then(json)
+        .then(data => {
+            console.log(`Deleted dog ${this.props.ID} successfully`)
+            this.setState({redirect:'/'});
+        })
+        .catch(errorResponse => {
+            console.error(`Error: ${JSON.stringify(errorResponse)}`);
+        })
+    }
+    
+    /**
+     * Render react card containing dog entry data
+     * @returns {JSX} - dog cards
+     */
+    render() {
+        const dogID = this.props.ID;
+        if (this.state.redirect){
+            return &lt;Redirect to={this.state.redirect} />
+        }
+        /*
+            Displays icons depending on login and staff status
+        */
+        let StatusIcons;
+        if (this.context.user.role === 'admin'){ /** Admin can update and delete */
+            StatusIcons = [
+                &lt;DogIcon type="favourite" selected={this.props.favourite}
+                    handleToggle={this.toggleFavourite}/>,
+                &lt;DogIcon type ="edit" seleted={this.props.edit}
+                    handleToggle={this.selectEdit}/>,
+                &lt;DogIcon type="delete" selected={this.props.delete}
+                    handleToggle={this.selectDelete}/>
+            ];
+        }else if (this.context.user.loggedIn === true){ /** logged in user can favourite */
+            StatusIcons = [
+                &lt;DogIcon type="favourite" selected={this.props.favourite}
+                    handleToggle={this.toggleFavourite}/>
+            ];
+        }
+        /** Returns the dog ant design card */
+        return (
+            &lt;Card
+                style={{ width: 320 }}
+                cover={&lt;NavImage alt={`Dog ${dogID}`} src={this.props.imageURL} to={`/dog/${dogID}`} />}
+                hoverable={true}
+                actions={
+                    StatusIcons
+                }>
+                &lt;Meta title={this.props.name} description={this.props.breed}/>
+            &lt;/Card>
+        );
+    }
+}
+
+export default DogCard; 
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-app.html">app</a></li><li><a href="module-app-test.html">app-test</a></li><li><a href="module-dogcard.html">dogcard</a></li><li><a href="module-dogform.html">dogform</a></li><li><a href="module-doggrid.html">doggrid</a></li><li><a href="module-dogicon.html">dogicon</a></li><li><a href="module-favgrid.html">favgrid</a></li><li><a href="module-favourites.html">favourites</a></li><li><a href="module-home.html">home</a></li><li><a href="module-login.html">login</a></li><li><a href="module-navbar.html">navbar</a></li><li><a href="module-navimage.html">navimage</a></li><li><a href="module-register.html">register</a></li><li><a href="module-searchdog.html">searchdog</a></li><li><a href="module-searchgrid.html">searchgrid</a></li><li><a href="module-singledog.html">singledog</a></li><li><a href="module-updatedog.html">updatedog</a></li><li><a href="module-upload.html">upload</a></li></ul><h3>Classes</h3><ul><li><a href="module-app-App.html">App</a></li><li><a href="module-dogcard-DogCard.html">DogCard</a></li><li><a href="module-dogform-DogForm.html">DogForm</a></li><li><a href="module-doggrid-DogGrid.html">DogGrid</a></li><li><a href="module-dogicon-DogIcon.html">DogIcon</a></li><li><a href="module-favgrid-FaveGrid.html">FaveGrid</a></li><li><a href="module-login-LoginForm.html">LoginForm</a></li><li><a href="module-register-RegistrationForm.html">RegistrationForm</a></li><li><a href="module-searchgrid-SearchGrid.html">SearchGrid</a></li><li><a href="module-singledog-Dog.html">Dog</a></li><li><a href="module-updatedog-UpdateForm.html">UpdateForm</a></li><li><a href="module-upload-UploadForm.html">UploadForm</a></li></ul><h3>Global</h3><ul><li><a href="global.html#json">json</a></li><li><a href="global.html#status">status</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Mon Apr 26 2021 16:19:44 GMT+0100 (British Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

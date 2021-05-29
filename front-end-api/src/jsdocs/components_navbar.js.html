@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/navbar.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/navbar.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * This module will generate the navbar.
+ * @module navbar
+ * @author Kieran Dhir
+ * @see app for the module that requires this module
+ */
+
+import React from 'react';
+import { useContext } from 'react'
+import { Menu } from 'antd';
+import { Link } from "react-router-dom";
+import UserContext from '../contexts/user'
+
+/**
+ * Function to generate navbar menu and menu items
+ * @returns {JSX} - navbar
+ */
+function Nav() {
+    const context = useContext(UserContext);
+    const loggedIn = context.user.loggedIn;
+    let StatusNavbar;
+    
+    /**
+     * Conditional rendering dependant on whether user is logged in and role of said user
+     */
+    if(!loggedIn){ /** users must login to access additonal navbar links */
+        StatusNavbar = (
+            &lt;>
+            &lt;Menu.Item key="2">
+                &lt;Link to="/register">Register&lt;/Link>
+            &lt;/Menu.Item>
+            &lt;Menu.Item key="3">
+                &lt;Link to="/login">Login&lt;/Link>
+            &lt;/Menu.Item>
+            &lt;/>
+        );
+    }else{
+        if(context.user.role === 'admin'){ /** Only staff can view upload navbar */
+            StatusNavbar = (
+                &lt;>
+                &lt;Menu.Item key="2">
+                    &lt;Link to={`/users/${context.user.ID}/favourites`}>Favourites&lt;/Link>
+                &lt;/Menu.Item>
+                &lt;Menu.Item key="3">
+                    &lt;Link to="/upload">Upload&lt;/Link>
+                &lt;/Menu.Item>
+                &lt;Menu.Item key="4" onClick={context.logout}>
+                    &lt;Link to="/">Logout&lt;/Link>
+                &lt;/Menu.Item>
+                &lt;/>
+            );
+        }else{ /** Standard user navbar links */
+            StatusNavbar = (
+                &lt;>
+                &lt;Menu.Item key="2">
+                    &lt;Link to={`/users/${context.user.ID}/favourites`}>Favourites&lt;/Link>
+                &lt;/Menu.Item>
+                &lt;Menu.Item key="3" onClick={context.logout}>
+                    &lt;Link to="/">Logout&lt;/Link>
+                &lt;/Menu.Item>
+                &lt;/>
+            );
+        }
+    }
+    /** Returns navbar with given conditional rendered menu items */
+    return (
+        &lt;>
+        &lt;div className="logo" />
+        &lt;Menu theme="dark" mode="horizontal" defaultSelectedKeys={['1']}>
+            &lt;Menu.Item key="1">&lt;Link to="/">Home&lt;/Link>&lt;/Menu.Item>
+            {StatusNavbar}
+        &lt;/Menu>
+        &lt;/>
+
+    );  
+}
+    
+export default Nav;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-app.html">app</a></li><li><a href="module-app-test.html">app-test</a></li><li><a href="module-dogcard.html">dogcard</a></li><li><a href="module-dogform.html">dogform</a></li><li><a href="module-doggrid.html">doggrid</a></li><li><a href="module-dogicon.html">dogicon</a></li><li><a href="module-favgrid.html">favgrid</a></li><li><a href="module-favourites.html">favourites</a></li><li><a href="module-home.html">home</a></li><li><a href="module-login.html">login</a></li><li><a href="module-navbar.html">navbar</a></li><li><a href="module-navimage.html">navimage</a></li><li><a href="module-register.html">register</a></li><li><a href="module-searchdog.html">searchdog</a></li><li><a href="module-searchgrid.html">searchgrid</a></li><li><a href="module-singledog.html">singledog</a></li><li><a href="module-updatedog.html">updatedog</a></li><li><a href="module-upload.html">upload</a></li></ul><h3>Classes</h3><ul><li><a href="module-app-App.html">App</a></li><li><a href="module-dogcard-DogCard.html">DogCard</a></li><li><a href="module-dogform-DogForm.html">DogForm</a></li><li><a href="module-doggrid-DogGrid.html">DogGrid</a></li><li><a href="module-dogicon-DogIcon.html">DogIcon</a></li><li><a href="module-favgrid-FaveGrid.html">FaveGrid</a></li><li><a href="module-login-LoginForm.html">LoginForm</a></li><li><a href="module-register-RegistrationForm.html">RegistrationForm</a></li><li><a href="module-searchgrid-SearchGrid.html">SearchGrid</a></li><li><a href="module-singledog-Dog.html">Dog</a></li><li><a href="module-updatedog-UpdateForm.html">UpdateForm</a></li><li><a href="module-upload-UploadForm.html">UploadForm</a></li></ul><h3>Global</h3><ul><li><a href="global.html#json">json</a></li><li><a href="global.html#status">status</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Mon Apr 26 2021 16:19:44 GMT+0100 (British Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

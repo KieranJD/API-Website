@@ -1,0 +1,7 @@
+CREATE TABLE favourites (
+     userID INT NOT NULL,
+     dogID INT NOT NULL,
+     FOREIGN KEY (userID) REFERENCES users (ID) ON DELETE CASCADE,
+     FOREIGN KEY (dogID) REFERENCES dogs (ID) ON DELETE CASCADE,
+     PRIMARY KEY (userID, dogID)
+);

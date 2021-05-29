@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/dogform.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/dogform.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * This module for generating dog update/create form.
+ * @module dogform
+ * @author Kieran Dhir
+ * @see upload for the module that requires this module
+ * @see updatedog for the module that requires this module
+ */
+
+import React from 'react';
+import { Form, Input, Button, Upload, InputNumber, Select } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
+
+const { Option } = Select;
+
+/*
+    Layout
+*/
+const formItemLayout = {
+    labelCol: { xs: { span: 24 }, sm: { span: 6 } }, 
+    wrapperCol: { xs: { span: 24 }, sm: { span: 12 } }    
+};
+    
+const tailFormItemLayout = {
+    wrapperCol: { xs: { span: 24, offset: 0 }, sm: { span: 16, offset: 6 } },
+}; 
+
+/*
+    Rules
+*/
+const nameRules = [
+    { required: true, message: "Please enter the dog's name", whitespace: true},
+    {min: 1, message: 'Name must be between 1 and 20 characters'},
+    {max: 20, message: 'Name must be between 1 and 20 characters'},
+    {type: 'string', message: 'This is not a valid name'}
+]
+
+const breedRules = [
+    {required: true, message: "Please enter the dog's breed"},
+    {min: 2, message: 'Breed must be between 2 and 20 characters'},
+    {max: 20, message: 'Breed must be between 2 and 20 characters'},
+    {type: 'string', message: 'This is not a valid breed'}
+]
+
+const sexRules = [
+    {required: true, message: "Please enter the dog's sex"},
+]
+
+const ageRules = [
+    {required: true, message: "Please enter the dog's age"},
+]
+
+/**
+ * Dog input form
+ * @class
+ */
+class DogForm extends React.Component {
+    
+    /**
+     * @constructor
+     * @param {props} props - react properties to be passed
+     */
+    constructor(props) {
+        super(props);
+        this.onFinish = this.props.onFinish.bind(this)
+    }
+    
+    /**
+     * Render react form for adding dog entries
+     * @returns {JSX} - dog form
+     */
+    render(){
+        /** 
+         * Returns ant design dog form 
+         * If submit is clicked onFinish is called
+        */
+        return (
+            &lt;Form { ...formItemLayout } name="upload" onFinish={this.onFinish} scrollToFirstError>
+            &lt;Form.Item name="name" label="Dog Name" rules={nameRules}>
+                &lt;Input />
+            &lt;/Form.Item>
+
+            &lt;Form.Item name="breed" label="Breed" rules={breedRules}>
+                &lt;Input />
+            &lt;/Form.Item>
+
+            &lt;Form.Item name="sex" label="Sex" rules={sexRules}>
+                &lt;Select
+                    placeholder="Select"
+                    >
+                    &lt;Option value="Male">Male&lt;/Option>
+                    &lt;Option value="Female">Female&lt;/Option>
+                &lt;/Select>
+            &lt;/Form.Item>
+            
+            &lt;Form.Item name="age" label="Age" rules={ageRules} >
+                &lt;InputNumber min={0} max={25} />
+            &lt;/Form.Item>
+
+            &lt;Form.Item name="imageURL" label="Photo" >
+                &lt;Upload name="dogImg" action="/upload.do" listType="picture">
+                    &lt;Button icon={&lt;UploadOutlined />}>Click to upload&lt;/Button>
+                &lt;/Upload>
+            &lt;/Form.Item>
+
+            &lt;Form.Item { ...tailFormItemLayout }>
+                &lt;Button type="primary" htmlType="submit">
+                    Upload
+                &lt;/Button>
+            &lt;/Form.Item>
+        &lt;/Form>
+        );
+    };
+
+}
+export default DogForm;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-app.html">app</a></li><li><a href="module-app-test.html">app-test</a></li><li><a href="module-dogcard.html">dogcard</a></li><li><a href="module-dogform.html">dogform</a></li><li><a href="module-doggrid.html">doggrid</a></li><li><a href="module-dogicon.html">dogicon</a></li><li><a href="module-favgrid.html">favgrid</a></li><li><a href="module-favourites.html">favourites</a></li><li><a href="module-home.html">home</a></li><li><a href="module-login.html">login</a></li><li><a href="module-navbar.html">navbar</a></li><li><a href="module-navimage.html">navimage</a></li><li><a href="module-register.html">register</a></li><li><a href="module-searchdog.html">searchdog</a></li><li><a href="module-searchgrid.html">searchgrid</a></li><li><a href="module-singledog.html">singledog</a></li><li><a href="module-updatedog.html">updatedog</a></li><li><a href="module-upload.html">upload</a></li></ul><h3>Classes</h3><ul><li><a href="module-app-App.html">App</a></li><li><a href="module-dogcard-DogCard.html">DogCard</a></li><li><a href="module-dogform-DogForm.html">DogForm</a></li><li><a href="module-doggrid-DogGrid.html">DogGrid</a></li><li><a href="module-dogicon-DogIcon.html">DogIcon</a></li><li><a href="module-favgrid-FaveGrid.html">FaveGrid</a></li><li><a href="module-login-LoginForm.html">LoginForm</a></li><li><a href="module-register-RegistrationForm.html">RegistrationForm</a></li><li><a href="module-searchgrid-SearchGrid.html">SearchGrid</a></li><li><a href="module-singledog-Dog.html">Dog</a></li><li><a href="module-updatedog-UpdateForm.html">UpdateForm</a></li><li><a href="module-upload-UploadForm.html">UploadForm</a></li></ul><h3>Global</h3><ul><li><a href="global.html#json">json</a></li><li><a href="global.html#status">status</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Mon Apr 26 2021 16:19:44 GMT+0100 (British Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

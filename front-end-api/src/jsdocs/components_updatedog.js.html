@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/updatedog.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/updatedog.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * The indivual dog update page - Displays update form to allow the admins to update dog entries.
+ * @module updatedog
+ * @author Kieran Dhir
+ * @see app for the module that requires this module
+ */
+
+import React from 'react';
+import { PageHeader } from 'antd';
+import { status, json } from '../utilities/requestHandlers';
+import UserContext from '../contexts/user';
+import { withRouter, Redirect } from 'react-router';
+import DogForm from './dogform'
+
+/**
+ * Update dog form
+ * @class
+ */
+class UpdateForm extends React.Component {
+
+    static contextType = UserContext;
+    state = {redirect: null};
+
+    /**
+     * Function to update a dog entry by passing update form data to backend.
+     * @param {array} values - array of field values taken from update form
+     */
+    onFinish = (values) => {
+        const id = this.props.match.params.id; /** available using withRouter() */
+        console.log(id);
+        console.log('Received form values ', values);
+        fetch(`http://localhost:3030/dogs/${id}`, {
+            method: "PUT",
+            body: JSON.stringify(values),
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": this.context.user.token
+            }
+        })
+        .then(status)
+        .then(json)
+        .then(dog => {
+            console.log(dog);
+            alert("Dog updated");
+            this.setState({redirect:'/'});
+        })
+        .catch(errorResponse => {
+            console.error(`Error: ${JSON.stringify(errorResponse)}`);
+        })
+    }
+
+    /**
+     * Render react form for allowing admins to update a dog's data
+     * @returns {JSX} - update dog page
+     */
+    render() {
+        const id = this.props.match.params.id; /** available using withRouter() */
+        /** Redirects router to given link */
+        if (this.state.redirect){
+            return &lt;Redirect to={this.state.redirect} />
+        }
+        /** Returns the update form jsx */
+        return (
+            &lt;>
+            &lt;PageHeader className="site-page-header"
+                title={`Update Dog ${id}`}/>,
+            &lt;DogForm onFinish={this.onFinish}/>
+            &lt;/>
+        );
+    };
+};
+
+export default withRouter(UpdateForm); </code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-app.html">app</a></li><li><a href="module-app-test.html">app-test</a></li><li><a href="module-dogcard.html">dogcard</a></li><li><a href="module-dogform.html">dogform</a></li><li><a href="module-doggrid.html">doggrid</a></li><li><a href="module-dogicon.html">dogicon</a></li><li><a href="module-favgrid.html">favgrid</a></li><li><a href="module-favourites.html">favourites</a></li><li><a href="module-home.html">home</a></li><li><a href="module-login.html">login</a></li><li><a href="module-navbar.html">navbar</a></li><li><a href="module-navimage.html">navimage</a></li><li><a href="module-register.html">register</a></li><li><a href="module-searchdog.html">searchdog</a></li><li><a href="module-searchgrid.html">searchgrid</a></li><li><a href="module-singledog.html">singledog</a></li><li><a href="module-updatedog.html">updatedog</a></li><li><a href="module-upload.html">upload</a></li></ul><h3>Classes</h3><ul><li><a href="module-app-App.html">App</a></li><li><a href="module-dogcard-DogCard.html">DogCard</a></li><li><a href="module-dogform-DogForm.html">DogForm</a></li><li><a href="module-doggrid-DogGrid.html">DogGrid</a></li><li><a href="module-dogicon-DogIcon.html">DogIcon</a></li><li><a href="module-favgrid-FaveGrid.html">FaveGrid</a></li><li><a href="module-login-LoginForm.html">LoginForm</a></li><li><a href="module-register-RegistrationForm.html">RegistrationForm</a></li><li><a href="module-searchgrid-SearchGrid.html">SearchGrid</a></li><li><a href="module-singledog-Dog.html">Dog</a></li><li><a href="module-updatedog-UpdateForm.html">UpdateForm</a></li><li><a href="module-upload-UploadForm.html">UploadForm</a></li></ul><h3>Global</h3><ul><li><a href="global.html#json">json</a></li><li><a href="global.html#status">status</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Mon Apr 26 2021 16:19:44 GMT+0100 (British Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

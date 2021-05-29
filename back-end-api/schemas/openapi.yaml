@@ -1,0 +1,334 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Canine Shelter API Development Back End
+  description: Canine Shelter API.
+  contact:
+    name: Kieran Dhir
+    email: dhirk@coventry.ac.uk
+  license:
+    name: Apache 2.0
+    url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+  - url: 'http://localhost:3030'
+    description: Development server
+tags:
+  - name: Users
+    description: API endpoints for user management.
+  - name: Dogs
+    description: Access and perform CRUD operations on dog entries.
+  - name: Favourite
+    description: Access and perform CRUD operations on user favourites (dogs entires).
+paths:
+  /users:
+    summary: Represents an individual user
+    description: >
+      This resource represents an individual user in the system.
+      Each user is identified by a numeric `id`.
+    get:
+      tags:
+        - Users
+      description:
+        Get a list of all users.
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                $ref: ./user.json#/definitions/userList
+        '401':
+          description: Not authenticated
+        '403':
+          description: Only admin users can list all accounts
+        '404':
+          description: No users found
+  /users/register:
+    post:
+      tags:
+        - Users
+      description:
+        Create a new user account.
+      requestBody:
+        description: All new user data.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./user.json#/definitions/user
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: ./user.json#/definitions/userCreated
+        '400':
+          description: Syntax incorrect
+        '409':
+          description: Email and/or Username already taken or staff code incorrect
+  /users/login:
+    post:
+      tags:
+        - Users
+      description:
+        Login to a user account.
+      requestBody:
+        description: Logging in the user.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./user.json#/definitions/userLogin
+      responses:
+        '200':
+          description: User logged in
+          content:
+            application/json:
+              schema:
+                $ref: ./user.json#/definitions/userLoggedIn
+        '401':
+          description: Incorrect username and password
+  /users/{id}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric id of the user
+    get:
+      tags:
+        - Users
+      description:
+        Get user by id.
+      responses:
+        '200':
+          description: View of user record
+          content:
+            application/json:
+              schema:
+                $ref: ./user.json#/definitions/userView
+        '401':
+          description: Not authenticated
+        '403':
+          description: Non-admin users can only view their own record
+        '404':
+          description: User not found
+  /dogs:
+    summary: Represents an individual dog
+    description: >
+      This resource represents an individual dog in the system.
+      Each dog is identified by a numeric `id`.
+    get:
+      tags:
+        - Dogs
+      description:
+        Get a list of all dogs.
+      responses:
+        '200':
+          description: List of dogs
+          content:
+            application/json:
+              schema:
+                $ref: ./dog.json#/definitions/dogList
+        '404':
+          description: No dogs found
+  /dogs/search:
+    get:
+      tags:
+        - Dogs
+      description:
+        Get a list of matching dogs
+      requestBody:
+        description: Searching for dogs.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./dog.json#/definitions/dogSearch
+      responses:
+        '200':
+          description: List of matching dogs
+          content:
+            application/json:
+              schema:
+                $ref: ./dog.json#/definitions/dogList
+        '400':
+          description: Search must be 3 or more characters
+        '404':
+          description: No matching dogs found
+  /dogs/upload:
+    post:
+      tags:
+        - Dogs
+      description:
+        Create a new dog record.
+      requestBody:
+        description: All new dog data.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./dog.json#/definitions/dog
+      responses:
+        '201':
+          description: Dog created
+          content:
+            application/json:
+              schema:
+                $ref: ./dog.json#/definitions/dogCreated
+        '400':
+          description: Syntax incorrect
+        '401':
+          description: Not authenticated
+        '403':
+          description: Only admins can create dog entries
+  /dogs/{id}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric id of the dog
+    get:
+      tags:
+        - Dogs
+      description:
+        Get dog by id.
+      responses:
+        '200':
+          description: View of dog record
+          content:
+            application/json:
+              schema:
+                $ref: ./dog.json#/definitions/dogView
+        '404':
+          description: Dog not found
+    put:
+      tags:
+        - Dogs
+      description:
+        Update dog by id.
+      requestBody:
+        description: Update the dog record.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./dog.json#/definitions/dog
+      responses:
+        '200':
+          description: Dog updated
+          content:
+            application/json:
+              schema:
+                $ref: ./dog.json#/definitions/dogUpdated
+        '400':
+          description: Syntax incorrect
+        '401':
+          description: Not authenticated
+        '403':
+          description: Only admins can update dog entries
+        '404':
+          description: Dog not found
+    delete:
+      tags:
+        - Dogs
+      description:
+        Delete dog by id.
+      responses:
+        '200':
+          description: Confirmation of deletion.
+          content:
+            application/json:
+              schema:
+                $ref: ./dog.json#/definitions/dogDeleted
+        '401':
+          description: Not authenticated
+        '403':
+          description: Only admins can delete dog entries
+        '404':
+          description: Dog not found
+  /users/{userid}/favourites:
+    summary: Represents a user's favourite dog list
+    description: >
+      This resource represents an individual user's favourite dog entires in the system.
+      Each favourite dog is identified by a numeric `id`.
+    parameters:
+      - in: path
+        name: userID
+        schema:
+          type: integer
+        required: true
+        description: Numeric id of the user
+    get:
+      tags:
+        - Favourite
+      description:
+        Get a list of all a user's favourite dog entires.
+      responses:
+        '200':
+          description: List of favourite dogs
+          content:
+            application/json:
+              schema:
+                $ref: ./favourite.json#/definitions/favouriteList
+        '401':
+          description: Not authenticated
+        '403':
+          description: Non-admin users can only view their own favourite records
+        '404':
+          description: User not found
+  /users/{userid}/favourites/{id}:
+    parameters:
+      - in: path
+        name: userID
+        schema:
+          type: integer
+        required: true
+        description: Numeric id of the user
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric id of the dog
+    post:
+      tags:
+        - Favourite
+      description:
+        Create a new favourite dog entry for user userID.
+      responses:
+        '201':
+          description: Favourite dog entry created
+          content:
+            application/json:
+              schema:
+                $ref: ./favourite.json#/definitions/favouriteCreated
+        '401':
+          description: Not authenticated
+        '403':
+          description: Non-admin users can only create their own favourite records
+        '404':
+          description: User or Dog not found or favourite already added
+    delete:
+      tags:
+        - Favourite
+      description:
+        Delete dog by userID and id.
+      responses:
+        '200':
+          description: Confirmation of deletion.
+          content:
+            application/json:
+              schema:
+                $ref: ./favourite.json#/definitions/favouriteDeleted
+        '401':
+          description: Not authenticated
+        '403':
+          description: Non-admin users can only delete their own favourite records
+        '404':
+          description: User or Dog not found
+

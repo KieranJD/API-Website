@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/singledog.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/singledog.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * The indivual dog page - Displays all the data for a single dog entry.
+ * @module singledog
+ * @author Kieran Dhir
+ * @see app for the module that requires this module
+ */
+
+import React from 'react';
+import { withRouter, Redirect } from 'react-router';
+import { Image, Row, Col, Typography } from 'antd'
+import DogIcon from './dogicon';
+import { status, json } from '../utilities/requestHandlers';
+import UserContext from '../contexts/user';
+
+const { Title, Paragraph } = Typography;
+
+/**
+ * Page for displaying a single dog entry
+ * @class
+ * @param {props} props - react properties to be passed
+ */
+class Dog extends React.Component {
+
+    /**
+     * @constructor
+     * @param {props} props - react properties to be passed
+     */
+    constructor(props) {
+        super(props);
+        this.state = {
+            dog: undefined
+        }
+        this.toggleFavourite = this.toggleFavourite.bind(this);
+        this.selectEdit = this.selectEdit.bind(this);
+        this.selectDelete = this.selectDelete.bind(this);
+    }
+
+    static contextType = UserContext;
+
+    state = {redirect: null};
+    
+    /**
+     * Invoked immediately after the component is mounted
+     * Requests a single dog entry from the backend.
+     */
+    componentDidMount() {
+        const id = this.props.match.params.id; // available using withRouter()
+
+        fetch(`http://localhost:3030/dogs/${id}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .then(status)
+        .then(json)
+        .then(data => {
+            this.setState({ dog: data })
+        })
+        .catch(err => console.log(`Error fetching dog ${id}`, err));  
+    }
+    
+    /**
+     * Function to toggle favourite icon
+     * @param {bool} isSelected - state of favourite icon
+     */
+    toggleFavourite(isSelected) {
+        const dogID = this.props.match.params.id;
+        console.log('fave was toggled');
+        if (isSelected === true){ /** Request dog entry is added to user's favourites */
+            fetch(`http://localhost:3030/users/${this.context.user.ID}/favourites/${dogID}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": this.context.user.token
+                }
+            })
+            .then(status)
+            .then(json)
+            .then(data => {
+                console.log(`Added dog ${dogID} to favourites successfully`)
+            })
+            .catch(errorResponse => {
+                console.error(`Error: ${JSON.stringify(errorResponse)}`);
+            })
+        }else{ /** Requests dog entry is deleted from user's favourites */
+            fetch(`http://localhost:3030/users/${this.context.user.ID}/favourites/${dogID}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": this.context.user.token
+                }
+            })
+            .then(status)
+            .then(json)
+            .then(data => {
+                console.log(`Deleted dog ${dogID} from favourites successfully`)
+            })
+            .catch(errorResponse => {
+                console.error(`Error: ${JSON.stringify(errorResponse)}`);
+            })
+        }
+    }
+
+    /**
+     * Function to redirect to given update link if edit icon is clicked
+     */
+    selectEdit(){
+        this.setState({redirect:`/update/dog/${this.props.match.params.id}`});
+    }
+
+    /**
+     * Function to delete dog entries
+     * Requests delete for the given dog entry to backend.
+     */
+    selectDelete(){
+        const dogID = this.props.match.params.id;
+        console.log(`Deleting dog ${dogID}`)
+        fetch(`http://localhost:3030/dogs/${dogID}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": this.context.user.token
+            }
+        })
+        .then(status)
+        .then(json)
+        .then(data => {
+            console.log(`Deleted dog ${dogID} successfully`)
+            this.setState({redirect:'/'});
+        })
+        .catch(errorResponse => {
+            console.error(`Error: ${JSON.stringify(errorResponse)}`);
+        })
+    }
+
+    /**
+     * Render page displaying a single dog entry
+     * @returns {JSX} - single dog entry page
+     */
+    render() {
+        /** Redirects router to given link */
+        if (this.state.redirect){
+            return &lt;Redirect to={this.state.redirect} />
+        }
+        
+        if (!this.state.dog) {
+            return &lt;h3>Loading Dog...&lt;/h3>
+        }
+        
+        const dog = this.state.dog;
+
+        /*
+            Displays icons depending on login and staff status
+        */
+        let StatusIcons;
+        if (this.context.user.role === 'admin'){ /** Admin can update and delete */
+            StatusIcons = (
+                &lt;>
+                &lt;div>
+                Favourite : &lt;DogIcon type="favourite" selected={dog.favourite}
+                    handleToggle={this.toggleFavourite}/>
+                &lt;/div>
+                &lt;div>
+                Edit : &lt;DogIcon type="edit" selected={dog.edit}
+                    handleToggle={this.selectEdit}/>
+                &lt;/div>
+                &lt;div>
+                Delete : &lt;DogIcon type="delete" selected={dog.delete}
+                    handleToggle={this.selectDelete}/>
+                &lt;/div>
+                &lt;/>
+            );
+        }else if (this.context.user.loggedIn === true){ /** logged in user can favourite */
+            StatusIcons = (
+                &lt;>
+                Favourite : &lt;DogIcon type="favourite" selected={dog.favourite}
+                    handleToggle={this.toggleFavourite}/>
+                &lt;/>
+            );
+        }
+        /** Returns the dog entry jsx */
+        return (
+            &lt;div>
+                &lt;Row type="flex" justify="space-around" align="middle">
+                    &lt;Col span={6} align="center">
+                        &lt;Image width={200} alt="Dog" src={dog.imageURL} />
+                    &lt;/Col>
+                    &lt;Col span={12}>
+                        &lt;Title>{dog.name}&lt;/Title>
+                        &lt;Paragraph>Breed: {dog.breed}&lt;/Paragraph>
+                        &lt;Paragraph>Sex: {dog.sex}&lt;/Paragraph>
+                        &lt;Paragraph>Age: {dog.age}&lt;/Paragraph>
+                    &lt;/Col>
+                    &lt;Col span={6} align="center">
+                        {StatusIcons}
+                    &lt;/Col>
+                &lt;/Row>
+            &lt;/div>
+        );
+    }
+}
+
+export default withRouter(Dog);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-app.html">app</a></li><li><a href="module-app-test.html">app-test</a></li><li><a href="module-dogcard.html">dogcard</a></li><li><a href="module-dogform.html">dogform</a></li><li><a href="module-doggrid.html">doggrid</a></li><li><a href="module-dogicon.html">dogicon</a></li><li><a href="module-favgrid.html">favgrid</a></li><li><a href="module-favourites.html">favourites</a></li><li><a href="module-home.html">home</a></li><li><a href="module-login.html">login</a></li><li><a href="module-navbar.html">navbar</a></li><li><a href="module-navimage.html">navimage</a></li><li><a href="module-register.html">register</a></li><li><a href="module-searchdog.html">searchdog</a></li><li><a href="module-searchgrid.html">searchgrid</a></li><li><a href="module-singledog.html">singledog</a></li><li><a href="module-updatedog.html">updatedog</a></li><li><a href="module-upload.html">upload</a></li></ul><h3>Classes</h3><ul><li><a href="module-app-App.html">App</a></li><li><a href="module-dogcard-DogCard.html">DogCard</a></li><li><a href="module-dogform-DogForm.html">DogForm</a></li><li><a href="module-doggrid-DogGrid.html">DogGrid</a></li><li><a href="module-dogicon-DogIcon.html">DogIcon</a></li><li><a href="module-favgrid-FaveGrid.html">FaveGrid</a></li><li><a href="module-login-LoginForm.html">LoginForm</a></li><li><a href="module-register-RegistrationForm.html">RegistrationForm</a></li><li><a href="module-searchgrid-SearchGrid.html">SearchGrid</a></li><li><a href="module-singledog-Dog.html">Dog</a></li><li><a href="module-updatedog-UpdateForm.html">UpdateForm</a></li><li><a href="module-upload-UploadForm.html">UploadForm</a></li></ul><h3>Global</h3><ul><li><a href="global.html#json">json</a></li><li><a href="global.html#status">status</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Mon Apr 26 2021 16:19:44 GMT+0100 (British Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

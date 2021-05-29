@@ -1,0 +1,94 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+
+      "favouriteView": {
+        "$id": "#favouriteView",
+        "title": "Favourite View",
+        "description": "Data only visible to owner.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Name of the dog",
+            "type": "string"
+          },
+          "breed": {
+            "description": "Breed of the dog",
+            "type": "string"
+          },
+          "sex": {
+            "description": "Sex of the dog",
+            "type": "string"
+          },
+          "age": {
+            "description": "Age of the dog",
+            "type": "integer"
+          },
+          "imageURL": {
+            "description": "URL of dog image",
+            "type": "string",
+            "format": "uri"
+          },
+          "dateCreated":{
+            "description": "The date the user was created",
+            "type": "string",
+            "format": "date-time"
+          },
+          "dateModified":{
+            "description": "The date the user was created",
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+
+      "favouriteList": {
+        "$id": "#favouriteList",
+        "title": "Favourite List",
+        "description": "List of all a user's favourite dogs.",
+        "type": "array",
+        "items": {"$ref": "#/definitions/favouriteView"}
+      },
+
+      "favouriteCreated": {
+        "$id": "#favouriteCreated",
+        "title": "Favourite Created",
+        "description": "Confirmation of a successful favourite creation",
+        "type": "object",
+        "properties": {
+          "ID": {
+            "description": "ID of the created favourite dog record",
+            "type": "integer"
+          },
+          "created": {
+            "description": "Boolean indicator of success",
+            "type": "boolean"
+          },
+          "link": {
+            "description": "Path to retrieve dog record",
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      
+      "favouriteDeleted": {
+        "$id": "#favouriteDeleted",
+        "title": "Favourite Deleted",
+        "description": "Confirmation of a successful deletion",
+        "type": "object",
+        "properties": {
+          "ID": {
+            "description": "ID of the deleted favourite dog record",
+            "type": "integer"
+          },
+          "deleted": {
+            "description": "Boolean indicator of success",
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+
+
